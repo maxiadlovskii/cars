@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {useFetch} from "../../hooks";
+import React, {useCallback, useEffect, useMemo} from 'react'
+import {useFetch, useQuery} from "../../hooks";
 import {getCarsData, getColors, getManufactures } from "../../api/cars";
 import {CarFilter} from "../../interfaces/api";
 import Pagination from '@material-ui/lab/Pagination';
@@ -9,8 +9,7 @@ import { useStyles } from './CarsList.styles'
 import { CarsListSkeleton } from "./CarsListSkeleton";
 
 export const CarsList = () => {
-    const [currentPage, setCurrentPage] = useState(1)
-    const [filters, setFilters] = useState({})
+    const { query: { currentPage, color, manufacturer }, addQuery } = useQuery()
     const [ { isFetching: fetchingCars,  data: { cars, totalPageCount } }, fetchData ] = useFetch(getCarsData)
     const [ { isFetching: fetchingColors, data: { colors }}, fetchColors] = useFetch(getColors)
     const [ { isFetching: fetchingManufactures, data: { manufacturers }}, fetchManufactures ] = useFetch(getManufactures)
@@ -27,20 +26,20 @@ export const CarsList = () => {
     }, [ fetchColors, fetchManufactures ])
     useEffect(()=>{
         getData({
-            page: currentPage,
-            ...filters
+            page: Number(currentPage || 1),
+            color: color as string,
+            manufacturer: manufacturer as string
         })
-    }, [ getData, filters, currentPage ])
+    }, [getData, color, manufacturer, currentPage])
 
     const handlePaginationChange = useCallback((_, page)=>{
-        setCurrentPage(page )
-    }, [setCurrentPage])
-    const handleFilterChange = useCallback((filters)=>{
-        setCurrentPage(1)
-        setFilters(filters)
-    }, [ setFilters, setCurrentPage ])
+        addQuery({currentPage: `${page}`})
+    }, [addQuery])
+    const handleFilterChange = useCallback((obj : { [key: string]: string})=>{
+        addQuery({currentPage: `${1}` , ...obj })
+    }, [addQuery])
     return <section className={classes.wrapper}>
-        <CarsFilter onChange={handleFilterChange} colors={colors} manufacturers={manufacturers} isFetching={isFetching}/>
+        <CarsFilter manufacturer={manufacturer as string} color={color as string} onChange={handleFilterChange} colors={colors} manufacturers={manufacturers} isFetching={isFetching}/>
             { isFetching ? <CarsListSkeleton />:
                 (
                     <ul className={classes.list}>

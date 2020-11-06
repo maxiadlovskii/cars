@@ -1,4 +1,4 @@
-import React, {useState, Dispatch, SetStateAction, useCallback } from 'react'
+import React, {useCallback} from 'react'
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -9,31 +9,18 @@ import Paper from "@material-ui/core/Paper";
 import {Colors, Manufacturers} from "../../interfaces/cars";
 import Grid from "@material-ui/core/Grid";
 
-export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
+export const CarsFilter = ({ colors, manufacturer, color, manufacturers, isFetching, onChange }: {
     colors: Colors,
     manufacturers: Manufacturers,
     isFetching: boolean,
-    onChange: (filter: { color: string, manufacturer: string }) => void
+    onChange: (filter: { [key: string]: string }) => void,
+    manufacturer: string, color: string
 }) => {
-    const [ colorValue, setColorValue  ] = useState('')
-    const [ manufacturerValue, setManufacturerValue  ] = useState('')
+    const classes = useStyles()
     const handleChange = useCallback((event: React.ChangeEvent<{ value: unknown, name?: string }>) => {
         const { value, name } = event.target
-        const mapSetters: {
-            [key: string]: Dispatch<SetStateAction<string>>,
-        } = ({
-            color: setColorValue,
-            manufacturer: setManufacturerValue
-        })
-        mapSetters[name as string](value as string)
-        onChange({
-            color: colorValue,
-            manufacturer: manufacturerValue,
-            [name as string]: value
-        })
-    }, [ onChange, colorValue, manufacturerValue ])
-
-    const classes = useStyles()
+        onChange({ [name as string]: value as string })
+    }, [onChange])
 
     return <Grid className={classes.container} container spacing={2} direction="row" alignItems="stretch" justify="center">
             <Grid item>
@@ -42,7 +29,7 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
                     labelId="color-label"
                     id="color"
                     name="color"
-                    value={colorValue}
+                    defaultValue={color}
                     onChange={handleChange}
                     input={<Input />}
                     autoWidth={true}
@@ -67,7 +54,7 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
                     labelId="manufacturer-label"
                     id="manufacturer"
                     name="manufacturer"
-                    value={manufacturerValue}
+                    defaultValue={manufacturer}
                     onChange={handleChange}
                     input={<Input />}
                     autoWidth={true}

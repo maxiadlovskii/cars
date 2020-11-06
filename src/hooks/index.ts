@@ -1,9 +1,11 @@
-import {useCallback, useReducer, useState, useEffect} from 'react';
-import { State } from '../interfaces/states'
+import {useCallback, useReducer, useState, useEffect, useMemo} from 'react';
+import {AxiosResponse} from "axios";
+import queryString from 'query-string';
+import { useLocation, useHistory } from 'react-router-dom'
 
+import {Query, State} from '../interfaces/states'
 import { CLEAR_ALL, CLEAR_ERROR, FAILED, REQUEST, SUCCESS } from '../constants/actions';
 import {Request} from "../interfaces/api";
-import {AxiosResponse} from "axios";
 
 const initialFetchState = {
     isFetching: false,
@@ -92,4 +94,19 @@ export const useImageLoader = (path: string) => {
         image.src = path
     }, [path]);
     return [isLoaded]
+};
+
+export const useQuery = () => {
+    const { search, pathname } = useLocation();
+    const { push } = useHistory();
+    const query = useMemo(() => queryString.parse(search), [search])
+
+    const addQuery = useCallback((obj: Query) => {
+        push(`${pathname}?${queryString.stringify({ ...query, ...obj })}`);
+    }, [push, pathname, query])
+
+    useEffect(() => {
+        console.log({ query, addQuery })
+    }, [ query, addQuery ])
+    return ({ query, addQuery });
 };
