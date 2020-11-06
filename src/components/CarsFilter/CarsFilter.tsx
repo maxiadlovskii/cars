@@ -8,6 +8,7 @@ import {Typography} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import {Colors, Manufacturers} from "../../interfaces/cars";
 import Grid from "@material-ui/core/Grid";
+import {useQuery} from "../../hooks";
 
 export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
     colors: Colors,
@@ -15,8 +16,9 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
     isFetching: boolean,
     onChange: (filter: { color: string, manufacturer: string }) => void
 }) => {
-    const [ colorValue, setColorValue  ] = useState('')
-    const [ manufacturerValue, setManufacturerValue  ] = useState('')
+    const { query: { manufacturer = '', color = '' }, addQuery } = useQuery()
+    const [ colorValue, setColorValue  ] = useState(color as string)
+    const [ manufacturerValue, setManufacturerValue  ] = useState(manufacturer as string)
     const handleChange = useCallback((event: React.ChangeEvent<{ value: unknown, name?: string }>) => {
         const { value, name } = event.target
         const mapSetters: {
@@ -26,12 +28,14 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
             manufacturer: setManufacturerValue
         })
         mapSetters[name as string](value as string)
-        onChange({
+        const filter = {
             color: colorValue,
             manufacturer: manufacturerValue,
-            [name as string]: value
-        })
-    }, [ onChange, colorValue, manufacturerValue ])
+            [name as string]: value as string
+        }
+        addQuery(filter)
+        onChange(filter)
+    }, [ onChange, colorValue, addQuery, manufacturerValue ])
 
     const classes = useStyles()
 

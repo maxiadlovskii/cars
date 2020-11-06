@@ -6,6 +6,5 @@ export interface CarFilter {
 }
 
 export interface Request {
-    query?: any,
-    data?: any
+    query?: any
 }
