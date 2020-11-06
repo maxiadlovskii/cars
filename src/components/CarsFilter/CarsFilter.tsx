@@ -16,7 +16,7 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
     isFetching: boolean,
     onChange: (filter: { color: string, manufacturer: string }) => void
 }) => {
-    const { query: { manufacturer = '', color = '' }, addQuery } = useQuery()
+    const { query: { manufacturer = '', color = '' } } = useQuery()
     const [ colorValue, setColorValue  ] = useState(color as string)
     const [ manufacturerValue, setManufacturerValue  ] = useState(manufacturer as string)
     const handleChange = useCallback((event: React.ChangeEvent<{ value: unknown, name?: string }>) => {
@@ -33,9 +33,8 @@ export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
             manufacturer: manufacturerValue,
             [name as string]: value as string
         }
-        addQuery(filter)
         onChange(filter)
-    }, [ onChange, colorValue, addQuery, manufacturerValue ])
+    }, [ onChange, colorValue, manufacturerValue ])
 
     const classes = useStyles()
 

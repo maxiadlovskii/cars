@@ -9,24 +9,38 @@ import { useStyles } from './CarsList.styles'
 import { CarsListSkeleton } from "./CarsListSkeleton";
 
 export const CarsList = () => {
-    const { query: { urlPage = 1, manufacturer = '', color = '' }, addQuery } = useQuery()
-    const [currentPage, setCurrentPage] = useState(Number(urlPage))
-    console.log({currentPage})
+    const classes = useStyles();
+    const { query: { p = 1, manufacturer = '', color = '' }, addQuery } = useQuery()
+
+    const [currentPage, setCurrentPage] = useState(Number(p))
     const [filters, setFilters] = useState({ manufacturer, color } as { manufacturer: string, color: string })
+
     const [ { isFetching: fetchingCars,  data: { cars, totalPageCount } }, fetchData ] = useFetch(getCarsData)
     const [ { isFetching: fetchingColors, data: { colors }}, fetchColors] = useFetch(getColors)
     const [ { isFetching: fetchingManufactures, data: { manufacturers }}, fetchManufactures ] = useFetch(getManufactures)
+
     const isFetching = useMemo(()=> fetchingCars || fetchingColors || fetchingManufactures, [
         fetchingCars, fetchingColors, fetchingManufactures
     ])
-    const classes = useStyles();
+
     const getData = useCallback((filers: CarFilter)=>{
         fetchData({query: filers })
     }, [ fetchData ])
+
+    const handlePaginationChange = useCallback((_, page)=>{
+        setCurrentPage(page)
+    }, [setCurrentPage])
+
+    const handleFilterChange = useCallback((filters)=>{
+        setCurrentPage(1)
+        setFilters(filters)
+    }, [ setFilters, setCurrentPage ])
+
     useEffect(()=> {
         fetchColors()
         fetchManufactures()
     }, [ fetchColors, fetchManufactures ])
+
     useEffect(()=>{
         getData({
             page: currentPage,
@@ -34,15 +48,10 @@ export const CarsList = () => {
         })
     }, [ getData, filters, currentPage ])
 
-    const handlePaginationChange = useCallback((_, page)=>{
-        addQuery({ urlPage: page })
-        setCurrentPage(page)
-    }, [setCurrentPage, addQuery])
-    const handleFilterChange = useCallback((filters)=>{
-        setCurrentPage(1)
-        addQuery({ urlPage: '1', ...filters })
-        setFilters(filters)
-    }, [ setFilters, setCurrentPage ])
+    useEffect(() => {
+        addQuery({ p: `${currentPage}`, ...filters })
+    }, [ filters, currentPage, addQuery ])
+
     return <section className={classes.wrapper}>
         <CarsFilter onChange={handleFilterChange} colors={colors} manufacturers={manufacturers} isFetching={isFetching}/>
             { isFetching ? <CarsListSkeleton />:
