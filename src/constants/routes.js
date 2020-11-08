@@ -1,3 +1,3 @@
 export const routes = {
-    carList: '/car-list'
-}
+  carList: "/car-list",
+};

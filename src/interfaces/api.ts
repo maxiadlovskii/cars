@@ -1,8 +1,8 @@
 export interface CarFilter {
-    manufacturer: string | null | string[],
-    color: string | null | string[]
+  manufacturer: string | null | string[];
+  color: string | null | string[];
 }
 
 export interface Request {
-    query?: any
+  query?: any;
 }
