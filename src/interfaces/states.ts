@@ -4,3 +4,7 @@ export interface State {
     isSuccess: boolean,
     data: any
 }
+
+export interface Query {
+    [key: string]: string
+}

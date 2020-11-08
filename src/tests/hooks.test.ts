@@ -3,7 +3,7 @@ import { useFetch } from '../hooks'
 import {fetcher, responseMock} from './moks'
 import {AxiosResponse} from "axios";
 
-test('should load image',  async () => {
+test('should store data',  async () => {
     const { result,waitForNextUpdate } = renderHook( () => useFetch(fetcher as (data?: any) => Promise<AxiosResponse>))
     await act(async () => {
         result.current[1]()

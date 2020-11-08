@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {useFetch} from "../../hooks";
+import {useFetch, useQuery} from "../../hooks";
 import {getCarsData, getColors, getManufactures } from "../../api/cars";
 import {CarFilter} from "../../interfaces/api";
 import Pagination from '@material-ui/lab/Pagination';
@@ -9,22 +9,38 @@ import { useStyles } from './CarsList.styles'
 import { CarsListSkeleton } from "./CarsListSkeleton";
 
 export const CarsList = () => {
-    const [currentPage, setCurrentPage] = useState(1)
-    const [filters, setFilters] = useState({})
+    const classes = useStyles();
+    const { query: { p = 1, manufacturer = '', color = '' }, addQuery } = useQuery()
+
+    const [currentPage, setCurrentPage] = useState(Number(p))
+    const [filters, setFilters] = useState({ manufacturer, color } as { manufacturer: string, color: string })
+
     const [ { isFetching: fetchingCars,  data: { cars, totalPageCount } }, fetchData ] = useFetch(getCarsData)
     const [ { isFetching: fetchingColors, data: { colors }}, fetchColors] = useFetch(getColors)
     const [ { isFetching: fetchingManufactures, data: { manufacturers }}, fetchManufactures ] = useFetch(getManufactures)
+
     const isFetching = useMemo(()=> fetchingCars || fetchingColors || fetchingManufactures, [
         fetchingCars, fetchingColors, fetchingManufactures
     ])
-    const classes = useStyles();
+
     const getData = useCallback((filers: CarFilter)=>{
-        return fetchData({query: filers })
+        fetchData({query: filers })
     }, [ fetchData ])
+
+    const handlePaginationChange = useCallback((_, page)=>{
+        setCurrentPage(page)
+    }, [setCurrentPage])
+
+    const handleFilterChange = useCallback((filters)=>{
+        setCurrentPage(1)
+        setFilters(filters)
+    }, [ setFilters, setCurrentPage ])
+
     useEffect(()=> {
         fetchColors()
         fetchManufactures()
     }, [ fetchColors, fetchManufactures ])
+
     useEffect(()=>{
         getData({
             page: currentPage,
@@ -32,13 +48,10 @@ export const CarsList = () => {
         })
     }, [ getData, filters, currentPage ])
 
-    const handlePaginationChange = useCallback((_, page)=>{
-        setCurrentPage(page )
-    }, [setCurrentPage])
-    const handleFilterChange = useCallback((filters)=>{
-        setCurrentPage(1)
-        setFilters(filters)
-    }, [ setFilters, setCurrentPage ])
+    useEffect(() => {
+        addQuery({ p: `${currentPage}`, ...filters })
+    }, [ filters, currentPage, addQuery ])
+
     return <section className={classes.wrapper}>
         <CarsFilter onChange={handleFilterChange} colors={colors} manufacturers={manufacturers} isFetching={isFetching}/>
             { isFetching ? <CarsListSkeleton />:
@@ -53,6 +66,6 @@ export const CarsList = () => {
 
                 )
             }
-        <Pagination disabled={isFetching} count={totalPageCount}  color="primary" onChange={handlePaginationChange}/>
+        <Pagination page={currentPage} disabled={isFetching} count={totalPageCount}  color="primary" onChange={handlePaginationChange}/>
     </section>
 }
