@@ -6,5 +6,5 @@ export interface State {
 }
 
 export interface Query {
-    [key: string]: string
+    [key: string]: string | null | string[]
 }

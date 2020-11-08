@@ -7,13 +7,14 @@ import { CarItem, CarsFilter } from '../'
 import {Car} from "../../interfaces/cars";
 import { useStyles } from './CarsList.styles'
 import { CarsListSkeleton } from "./CarsListSkeleton";
+import {Query} from "../../interfaces/states";
 
 export const CarsList = () => {
     const classes = useStyles();
     const { query: { p = 1, manufacturer = '', color = '' }, addQuery } = useQuery()
 
     const [currentPage, setCurrentPage] = useState(Number(p))
-    const [filters, setFilters] = useState({ manufacturer, color } as { manufacturer: string, color: string })
+    const [filters, setFilters] = useState<CarFilter>({ manufacturer, color })
 
     const [ { isFetching: fetchingCars,  data: { cars, totalPageCount } }, fetchData ] = useFetch(getCarsData)
     const [ { isFetching: fetchingColors, data: { colors }}, fetchColors] = useFetch(getColors)
@@ -23,7 +24,7 @@ export const CarsList = () => {
         fetchingCars, fetchingColors, fetchingManufactures
     ])
 
-    const getData = useCallback((filers: CarFilter)=>{
+    const getData = useCallback((filers: Query)=>{
         fetchData({query: filers })
     }, [ fetchData ])
 
@@ -43,13 +44,17 @@ export const CarsList = () => {
 
     useEffect(()=>{
         getData({
-            page: currentPage,
+            page: `${currentPage}`,
             ...filters
         })
     }, [ getData, filters, currentPage ])
 
     useEffect(() => {
-        addQuery({ p: `${currentPage}`, ...filters })
+        addQuery({
+            p: `${currentPage}`,
+            manufacturer: filters.manufacturer,
+            color: filters.color
+        })
     }, [ filters, currentPage, addQuery ])
 
     return <section className={classes.wrapper}>

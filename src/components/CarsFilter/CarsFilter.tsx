@@ -9,12 +9,13 @@ import Paper from "@material-ui/core/Paper";
 import {Colors, Manufacturers} from "../../interfaces/cars";
 import Grid from "@material-ui/core/Grid";
 import {useQuery} from "../../hooks";
+import {CarFilter} from "../../interfaces/api";
 
 export const CarsFilter = ({ colors, manufacturers, isFetching, onChange }: {
     colors: Colors,
     manufacturers: Manufacturers,
     isFetching: boolean,
-    onChange: (filter: { color: string, manufacturer: string }) => void
+    onChange: (filter: CarFilter) => void
 }) => {
     const { query: { manufacturer = '', color = '' } } = useQuery()
     const [ colorValue, setColorValue  ] = useState(color as string)
